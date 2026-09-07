@@ -5,3 +5,25 @@
   fail_on_prepare_env_warning: true
   events:
   - type: WEBHOOK
+  actions:
+  - action: $GRADLE_BIN assembleDebug
+    type: BUILD
+    commands: |-
+      if [ ! -f "./gradlew" ]; then
+        echo "No gradlew found, downloading Gradle 8.7..."
+        wget -q https://services.gradle.org/distributions/gradle-8.7-bin.zip -O /tmp/gradle.zip
+        unzip -q /tmp/gradle.zip -d /tmp
+        GRADLE_BIN=/tmp/gradle-8.7/bin/gradle
+      else
+        chmod +x ./gradlew
+        GRADLE_BIN=./gradlew
+      fi
+
+      $GRADLE_BIN assembleDebug
+    setup_commands: apt-get update && apt-get install -y unzip curl
+    cached_dirs:
+    - /root/.gradle
+    - /opt/android/sdk
+    shell: BASH
+    docker_image_name: library/eclipse-temurin
+    docker_image_tag: 25
